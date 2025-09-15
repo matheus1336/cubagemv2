@@ -8,16 +8,17 @@ body {
   font-family: "Segoe UI", Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background: #f0f4f8;
-  color: #2c3e50;
+  background: #f4f7f6;
+  color: #333;
 }
 
 header {
-  background: #004080;
+  background: #ffffff;
   padding: 15px 30px;
   display: flex;
   align-items: center;
-  color: white;
+  color: #004080;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 header img {
@@ -30,58 +31,88 @@ header h1 {
   margin: 0;
 }
 
-/* Container principal */
 main {
-  max-width: 1100px;
-  margin: 20px auto;
-  padding: 0 20px 50px 20px;
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 30px;
 }
 
-/* Card */
+.layout-container {
+  display: flex;
+  gap: 30px;
+}
+
+.left-column {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.right-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
 .card {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
-  padding: 20px;
-  margin-bottom: 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  padding: 25px;
+  margin-bottom: 0;
 }
 
-/* Títulos */
-h2 {
+h2, h3 {
   color: #004080;
   margin-top: 0;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
 }
 
-/* Inputs e botões */
 input[type="text"], input[type="number"] {
-  padding: 10px;
+  padding: 12px;
   width: 100%;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 6px;
   margin-bottom: 15px;
   font-size: 15px;
   box-sizing: border-box;
 }
 
+textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  box-sizing: border-box;
+  font-family: "Consolas", "Monaco", monospace;
+  resize: vertical;
+}
+
 button {
-  background: #004080;
+  background: #005a9c;
   color: white;
-  padding: 10px 16px;
+  padding: 12px 20px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 500;
   transition: 0.2s;
   margin-right: 10px;
-  margin-top: 5px;
+  margin-top: 10px;
 }
 
 button:hover {
-  background: #0066cc;
+  background: #004080;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* Lista de produtos */
 ul {
   list-style: none;
   padding: 0;
@@ -91,10 +122,10 @@ li.produto {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 10px;
-  margin: 5px 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 8px 0;
   background: #fafafa;
 }
 
@@ -109,11 +140,10 @@ li.produto button:hover {
   background: #2ecc71;
 }
 
-/* Resultado cubagem */
 #resultado, #resultado_busca {
   background: #f9fbff;
   border: 1px solid #dce6f5;
-  padding: 15px;
+  padding: 20px;
   border-radius: 8px;
   margin-top: 15px;
   overflow-x: auto;
@@ -122,36 +152,34 @@ li.produto button:hover {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 table th, table td {
-  border: 1px solid #ddd;
-  padding: 8px;
+  border: 1px solid #e0e0e0;
+  padding: 12px;
   text-align: left;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 table th {
-  background: #004080;
-  color: white;
+  background: #f9fafb;
+  color: #333;
+  font-weight: 600;
 }
 
-/* Divisão de seções */
-.section {
-  margin-bottom: 25px;
+table tr:nth-child(even) {
+  background-color: #fdfdfd;
 }
 
-/* Botões dentro de listas */
 .produto-buttons button {
   margin-left: 5px;
 }
 
-/* Responsividade */
-@media(max-width: 768px) {
-  header { flex-direction: column; text-align: center; }
-  header img { margin-bottom: 10px; }
-  button { width: 100%; margin-top: 10px; }
+@media(max-width: 900px) {
+  .layout-container {
+    flex-direction: column;
+  }
 }
 </style>
 </head>
@@ -162,34 +190,45 @@ table th {
 </header>
 
 <main>
-  <!-- Seção 1: Busca de produtos -->
-  <div class="card section">
-    <h2>Buscar Produtos</h2>
-    <input type="text" id="busca" placeholder="Buscar por código ou nome...">
-    <ul id="resultados"></ul>
+  <div class="layout-container">
+    <!-- Coluna da Esquerda: Ações -->
+    <div class="left-column">
+      <div class="card section">
+        <h2>Buscar Produtos</h2>
+        <input type="text" id="busca" placeholder="Buscar por código ou nome...">
+        <ul id="resultados"></ul>
+      </div>
+      <div class="card section">
+        <h2>Colar Lista de Produtos</h2>
+        <textarea id="paste_area" rows="8" placeholder="Cole sua lista aqui. Formato esperado por linha:&#10;Quantidade / Código / Descrição&#10;Exemplo:&#10;2 / 98005200 / TANQUE MONTADO #26TP-II,&#10;1 / 93571453 / BOMBA #15B-T"></textarea>
+        <button onclick="processarListaPendente()">Processar Lista e Calcular</button>
+      </div>
+      <div class="card section">
+        <h3>Itens Selecionados</h3>
+        <ul id="selecionados"></ul>
+        <button onclick="calcularCubagem()">Calcular Cubagem</button>
+        <button onclick="exportarPDF()">Exportar PDF</button>
+      </div>
+    </div>
 
-    <h3>Itens Selecionados</h3>
-    <ul id="selecionados"></ul>
-    <button onclick="calcularCubagem()">Calcular Cubagem</button>
-    <button onclick="exportarPDF()">Exportar PDF</button>
-  </div>
-
-  <!-- Seção 2: Resultado cubagem -->
-  <div class="card section">
-    <h2>Resultado da Cubagem</h2>
-    <div id="resultado"></div>
-  </div>
-
-  <!-- Seção 3: Buscar cubagem pelo número -->
-  <div class="card section">
-    <h2>Buscar Cubagem pelo Número</h2>
-    <input type="number" id="busca_cubagem" placeholder="Digite o número da cubagem...">
-    <button onclick="buscarCubagem()">Buscar Cubagem</button>
-    <div id="resultado_busca"></div>
+    <!-- Coluna da Direita: Resultados -->
+    <div class="right-column">
+      <div class="card section">
+        <h2>Resultado da Cubagem</h2>
+        <div id="resultado"></div>
+      </div>
+      <div class="card section">
+        <h2>Buscar Cubagem pelo Número</h2>
+        <input type="number" id="busca_cubagem" placeholder="Digite o número da cubagem...">
+        <button onclick="buscarCubagem()">Buscar Cubagem</button>
+        <div id="resultado_busca"></div>
+      </div>
+    </div>
   </div>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 <script>
 // --- JS permanece igual ao anterior ---
 const resultadosEl = document.getElementById("resultados");
@@ -207,16 +246,44 @@ document.getElementById("busca").addEventListener("input", async (e) => {
     const li = document.createElement("li");
     li.className = "produto";
     li.innerHTML = `<span>${prod.Codigo} - ${prod.Nome} (${prod.m3_total.toFixed(3)} m³, ${prod.Peso.toFixed(2)} kg)</span>
-      <button onclick="adicionar('${prod.Codigo}','${prod.Nome}')">Adicionar</button>`;
+      <button onclick="adicionar(this, '${prod.Codigo}','${prod.Nome}')">Adicionar</button>`;
     resultadosEl.appendChild(li);
   });
 });
 
-function adicionar(codigo, nome) {
-  const existente = selecionados.find(i => i.codigo === codigo);
-  if (existente) existente.quantidade++;
-  else selecionados.push({ codigo, nome, quantidade:1 });
+async function adicionarItemESeusAgregados(item) {
+  const existente = selecionados.find(i => i.codigo === item.codigo);
+  if (existente) {
+    existente.quantidade += item.quantidade;
+  } else {
+    selecionados.push(item);
+  }
+
+  if (item.nome.startsWith("SPA J")) {
+    const match = item.nome.match(/J\d{3}/);
+    if (match) {
+        const spaModel = match[0];
+        const searchTerm = `Cobertura Térmica - ${spaModel}`;
+        const res = await fetch(`/buscar?q=${encodeURIComponent(searchTerm)}`);
+        const data = await res.json();
+        if (data.length > 0) {
+            const cover = data[0];
+            const coverInCart = selecionados.find(i => i.codigo === cover.Codigo);
+            if (!coverInCart) {
+                selecionados.push({ codigo: cover.Codigo, nome: cover.Nome, quantidade: 1 });
+            }
+        }
+    }
+  }
+}
+
+async function adicionar(buttonElement, codigo, nome) {
+  await adicionarItemESeusAgregados({ codigo, nome, quantidade: 1 });
   atualizarSelecionados();
+  
+  buttonElement.textContent = 'Adicionado ✔';
+  buttonElement.disabled = true;
+  buttonElement.style.background = '#28a745';
 }
 
 function incrementar(codigo) { const item = selecionados.find(i => i.codigo===codigo); if(item){item.quantidade++; atualizarSelecionados();} }
@@ -278,32 +345,138 @@ async function buscarCubagem(){
 }
 
 async function exportarPDF(){
-  if(!ultimoResultado){ alert("Calcule a cubagem antes de exportar."); return; }
-  const {jsPDF} = window.jspdf;
-  const doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
-  const margem=10, largura=190; let y=10;
-  const img=new Image(); img.src="https://i.postimg.cc/VLwvF6FG/jacuzzi-logo.png";
-  img.onload=function(){
-    doc.addImage(img,"PNG",margem,y,50,20); y+=25;
-    doc.setFontSize(18); doc.text("Relatório de Cubagem",70, y); y+=10;
-    doc.setFontSize(12);
-    doc.text(`Número da Cubagem: ${ultimoResultado.numero_cubagem}`,margem,y); y+=7;
-    doc.text(`Total Volume: ${ultimoResultado.volume_total.toFixed(3)} m³`,margem,y); y+=7;
-    doc.text(`Total Peso: ${ultimoResultado.peso_total.toFixed(2)} kg`,margem,y); y+=10;
-    doc.text("Caixas possíveis:",margem,y); y+=7;
-    ultimoResultado.caixas.forEach(c=>{ doc.text(`- ${c.nome} (${c.capacidade} m³)`, margem+5, y); y+=7; });
-    y+=5; doc.setFontSize(14); doc.text("Itens Selecionados:",margem,y); y+=7;
-    doc.setFontSize(11);
-    ultimoResultado.itens.forEach(item=>{
-      const linha=`${item.Codigo} - ${item.Nome} | Qtd:${item.Quantidade} | C:${item.Comprimento} x L:${item.Largura} x A:${item.Altura} cm | V:${item.m3_total.toFixed(3)} m³ | P:${item.Peso.toFixed(2)} kg`;
-      const linhasQuebradas=doc.splitTextToSize(linha, largura);
-      linhasQuebradas.forEach(txt=>{
-        if(y>280){ doc.addPage(); y=20; }
-        doc.text(txt,margem,y); y+=6;
-      });
-    });
-    doc.save("relatorio_cubagem.pdf");
-  };
+    if(!ultimoResultado){ alert("Calcule a cubagem antes de exportar."); return; }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const head = [['Código', 'Nome', 'Qtd', 'Comp.', 'Larg.', 'Alt.', 'Volume', 'Peso (kg)']];
+    const body = ultimoResultado.itens.map(item => [
+        item.Codigo,
+        item.Nome,
+        item.Quantidade,
+        item.Comprimento.toFixed(2),
+        item.Largura.toFixed(2),
+        item.Altura.toFixed(2),
+        item.m3_total.toFixed(4),
+        item.Peso.toFixed(2)
+    ]);
+
+    const img = new Image();
+    img.src = "https://i.postimg.cc/VLwvF6FG/jacuzzi-logo.png";
+    img.onload = function() {
+        doc.addImage(img, 'PNG', 10, 10, 50, 20);
+        doc.setFontSize(18);
+        doc.text('Relatório de Cubagem', 70, 25);
+
+        doc.setFontSize(12);
+        doc.text(`Número da Cubagem: ${ultimoResultado.numero_cubagem}`, 10, 40);
+        doc.text(`Data: ${new Date().toLocaleDateString()}`, 10, 47);
+        doc.text(`Volume Total: ${ultimoResultado.volume_total.toFixed(4)} m³`, 10, 54);
+        doc.text(`Peso Total: ${ultimoResultado.peso_total.toFixed(2)} kg`, 10, 61);
+
+        doc.autoTable({
+            head: head,
+            body: body,
+            startY: 70,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [0, 64, 128]
+            }
+        });
+        
+        const caixasY = doc.autoTable.previous.finalY + 10;
+        doc.setFontSize(12);
+        doc.text('Caixas possíveis:', 10, caixasY);
+        let y = caixasY + 7;
+        ultimoResultado.caixas.forEach(c => {
+            doc.text(`- ${c.nome} (${c.capacidade} m³)`, 15, y);
+            y += 7;
+        });
+
+        doc.save(`cubagem_${ultimoResultado.numero_cubagem}.pdf`);
+    }
+}
+
+async function processarListaPendente() {
+    const text = document.getElementById('paste_area').value;
+    if (!text.trim()) {
+        alert('Por favor, cole a lista de produtos na área de texto.');
+        return;
+    }
+
+    selecionados.length = 0;
+    atualizarSelecionados();
+
+    const lines = text.replace(/,/g, '\n').split('\n').filter(line => line.trim() !== '');
+    
+    let itemsToProcess = [];
+    for (const line of lines) {
+        const firstSeparator = line.search(/[\/,]/);
+
+        if (firstSeparator === -1) continue;
+
+        const quantityStr = line.substring(0, firstSeparator).trim();
+        const quantity = parseInt(quantityStr, 10);
+        const identifier = line.substring(firstSeparator + 1).trim();
+
+        if (isNaN(quantity) || !identifier) continue;
+        
+        if (!isNaN(identifier) && !isNaN(parseFloat(identifier))) {
+            itemsToProcess.push({ type: 'code', value: identifier, quantity: quantity });
+        } else {
+            itemsToProcess.push({ type: 'description', value: identifier, quantity: quantity });
+        }
+    }
+
+    const codesToFetch = itemsToProcess.filter(i => i.type === 'code').map(i => i.value);
+    const descriptionsToFetch = itemsToProcess.filter(i => i.type === 'description');
+    
+    const fetchPromises = [];
+    if (codesToFetch.length > 0) {
+        fetchPromises.push(fetch('/buscar_lista', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ codigos: codesToFetch })
+        }).then(res => res.json()));
+    }
+    for (const item of descriptionsToFetch) {
+        fetchPromises.push(fetch(`/buscar?q=${encodeURIComponent(item.value)}`).then(res => res.json()));
+    }
+
+    const allResults = await Promise.all(fetchPromises);
+    const allFoundProducts = allResults.flat();
+
+    const addPromises = [];
+    let notFoundItems = [];
+
+    for (const item of itemsToProcess) {
+        let product;
+        if (item.type === 'code') {
+            product = allFoundProducts.find(p => p.Codigo === item.value);
+        } else {
+            product = allFoundProducts.find(p => p.Nome.toLowerCase().includes(item.value.toLowerCase()));
+        }
+
+        if (product) {
+            addPromises.push(adicionarItemESeusAgregados({
+                codigo: product.Codigo,
+                nome: product.Nome,
+                quantidade: item.quantity
+            }));
+        } else {
+            notFoundItems.push(item.value);
+        }
+    }
+
+    await Promise.all(addPromises);
+
+    atualizarSelecionados();
+    
+    if (notFoundItems.length > 0) {
+        alert(`Os seguintes itens não foram encontrados:\n${notFoundItems.join('\n')}`);
+    }
+
+    await calcularCubagem();
 }
 </script>
 </body>
