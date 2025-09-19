@@ -250,10 +250,7 @@ def cubagem():
 
             item_type = r.get("Tipo", "").strip().lower()
 
-            if item_type == "acessorio":
-                caixa_15tp_capacidade = 0.12
-                volume_para_caixas += qtd * caixa_15tp_capacidade
-            elif item_type != "caixa individual":
+            if item_type != "caixa individual":
                 volume_para_caixas += volume_item
 
             itens_lista.append({
@@ -264,17 +261,19 @@ def cubagem():
                 "Altura": float(r.get("Altura", 0.0)),
                 "m3_total": volume_item,
                 "Peso": float(r.get("Peso", 0.0)) * qtd,
-                "Quantidade": qtd
+                "Quantidade": qtd,
+                "Tipo": r["Tipo"]
             })
 
-        caixa_15tp_capacidade = 0.12
+        caixa_15tp_capacidade = 0.15
         num_caixas = 0
         if volume_para_caixas > 0:
             num_caixas = math.ceil(volume_para_caixas / caixa_15tp_capacidade)
         
         if num_caixas > 0:
             caixas_possiveis = [{
-                "nome": f"{num_caixas}x Caixa 15TP",
+                "qtd_caixas": num_caixas,
+                "tipo_caixa": "15TP",
                 "capacidade": num_caixas * caixa_15tp_capacidade
             }]
         else:
