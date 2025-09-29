@@ -1,592 +1,379 @@
-  <!DOCTYPE html>
-  <html lang="pt-BR">
-  <head>
-  <meta charset="UTF-8">
-  <title>Sistema de Cubagem - Jacuzzi</title>
-  <style>
-  body {
-    font-family: "Segoe UI", Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background: #f4f7f6;
-    color: #333;
-  }
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Cubagem Integrado - Jacuzzi</title>
+    <style>
+        body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; padding: 0; background: #f4f7f6; color: #333; }
+        header { background: #ffffff; padding: 15px 30px; display: flex; align-items: center; color: #004080; border-bottom: 1px solid #e0e0e0; }
+        header img { height: 50px; margin-right: 20px; }
+        header h1 { font-size: 24px; margin: 0; }
+        .nav-tabs { background: #fff; padding: 0 30px; border-bottom: 1px solid #ddd; }
+        .tab-button { background: none; border: none; padding: 15px 20px; cursor: pointer; font-size: 16px; border-bottom: 3px solid transparent; }
+        .tab-button.active { color: #005a9c; border-bottom: 3px solid #005a9c; font-weight: bold; }
+        main { max-width: 1200px; margin: 30px auto; padding: 0 30px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .layout-container { display: flex; gap: 30px; }
+        .left-column { flex: 2; display: flex; flex-direction: column; gap: 30px; }
+        .right-column { flex: 1; display: flex; flex-direction: column; gap: 30px; }
+        .card { background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 25px; margin-bottom: 0; }
+        h2, h3 { color: #004080; margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        input[type="text"], input[type="number"] { padding: 12px; width: 100%; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 15px; font-size: 15px; box-sizing: border-box; }
+        textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 15px; font-size: 14px; box-sizing: border-box; font-family: "Consolas", "Monaco", monospace; resize: vertical; }
+        button { background: #005a9c; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 500; transition: 0.2s; margin-right: 10px; margin-top: 10px; }
+        button:hover { background: #004080; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        ul { list-style: none; padding: 0; }
+        #selecionados { max-height: 300px; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
+        li.produto { display: flex; justify-content: space-between; align-items: center; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px; margin: 8px 0; background: #fafafa; }
+        #resultado, #resultado_busca { background: #f9fbff; border: 1px solid #dce6f5; padding: 20px; border-radius: 8px; margin-top: 15px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        table th, table td { border: 1px solid #e0e0e0; padding: 6px; text-align: left; font-size: 8px; }
+        table th { background: #f9fafb; color: #333; font-weight: 600; }
+        .qtd-input { width: 60px !important; padding: 2px; text-align: center; border: 1px solid #ccc; border-radius: 3px; margin: 0 4px; font-size: 12px; height: 26px; box-sizing: border-box; }
+    </style>
+    <style>
+        #visualizador-tab { height: 80vh; }
+        #v3d-container { display: flex; width: 100%; height: 100%; background-color: #f0f0f0; }
+        #v3d-scene-container { flex-grow: 1; position: relative; }
+        #v3d-canvas { display: block; width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://i.postimg.cc/VLwvF6FG/jacuzzi-logo.png" alt="Jacuzzi Logo">
+        <h1>Sistema de Cubagem Integrado</h1>
+    </header>
 
-  header {
-    background: #ffffff;
-    padding: 15px 30px;
-    display: flex;
-    align-items: center;
-    color: #004080;
-    border-bottom: 1px solid #e0e0e0;
-  }
+    <nav class="nav-tabs">
+        <button class="tab-button active" onclick="showTab('cubagem-tab')">Calculadora de Cubagem</button>
+        <button class="tab-button" onclick="showTab('visualizador-tab')">Visualizador 3D de Carga</button>
+    </nav>
 
-  header img {
-    height: 50px;
-    margin-right: 20px;
-  }
-
-  header h1 {
-    font-size: 24px;
-    margin: 0;
-  }
-
-  main {
-    max-width: 1200px;
-    margin: 30px auto;
-    padding: 0 30px;
-  }
-
-  .layout-container {
-    display: flex;
-    gap: 30px;
-  }
-
-  .left-column {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-  }
-
-  .right-column {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-  }
-
-  .card {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    padding: 25px;
-    margin-bottom: 0;
-  }
-
-  h2, h3 {
-    color: #004080;
-    margin-top: 0;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-  }
-
-  input[type="text"], input[type="number"] {
-    padding: 12px;
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    margin-bottom: 15px;
-    font-size: 15px;
-    box-sizing: border-box;
-  }
-
-  textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    margin-bottom: 15px;
-    font-size: 14px;
-    box-sizing: border-box;
-    font-family: "Consolas", "Monaco", monospace;
-    resize: vertical;
-  }
-
-  button {
-    background: #005a9c;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 500;
-    transition: 0.2s;
-    margin-right: 10px;
-    margin-top: 10px;
-  }
-
-  button:hover {
-    background: #004080;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  }
-
-  ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  #selecionados {
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid #eee;
-    padding: 10px;
-    border-radius: 6px;
-    margin-bottom: 15px;
-  }
-
-  li.produto {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    padding: 12px;
-    margin: 8px 0;
-    background: #fafafa;
-  }
-
-  li.produto button {
-    margin-left: 5px;
-    background: #27ae60;
-    font-size: 13px;
-    padding: 5px 10px;
-  }
-
-  li.produto button:hover {
-    background: #2ecc71;
-  }
-
-
-  #resultado, #resultado_busca {
-    background: #f9fbff;
-    border: 1px solid #dce6f5;
-    padding: 20px;
-    border-radius: 8px;
-    margin-top: 15px;
-    overflow-x: auto;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-  }
-
-  table th, table td {
-    border: 1px solid #e0e0e0;
-    padding: 6px;
-    text-align: left;
-    font-size: 8px;
-  }
-
-  table th {
-    background: #f9fafb;
-    color: #333;
-    font-weight: 600;
-  }
-
-  table tr:nth-child(even) {
-    background-color: #fdfdfd;
-  }
-
-  .produto-buttons button {
-    margin-left: 5px;
-  }
-
-  .qtd-input {
-  width: 60px !important;   /* largura menor e forçada */
-  padding: 2px;
-  text-align: center;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  margin: 0 4px;
-  font-size: 12px;
-  height: 26px;
-  box-sizing: border-box;
-}
-
-  @media(max-width: 900px) {
-    .layout-container {
-      flex-direction: column;
-    }
-  }
-  </style>
-  </head>
-  <body>
-  <header>
-    <img src="https://i.postimg.cc/VLwvF6FG/jacuzzi-logo.png" alt="Jacuzzi Logo">
-    <h1>Sistema de Cubagem</h1>
-  </header>
-
-  <main>
-    <div class="layout-container">
-      <!-- Coluna da Esquerda: Ações -->
-      <div class="left-column">
-        <div class="card section">
-          <h3>Itens Selecionados</h3>
-          <ul id="selecionados"></ul>
-          <button onclick="calcularCubagem()">Calcular Cubagem</button>
-          <button onclick="exportarPDF()">Exportar PDF</button>
-        </div>
-        <div class="card section">
-          <h2>Buscar Produtos</h2>
-          <input type="text" id="busca" placeholder="Buscar por código ou nome...">
-          <ul id="resultados"></ul>
-        </div>
-        <div class="card section">
-          <h2>Colar Lista de Produtos</h2>
-          <textarea id="paste_area" rows="8" placeholder="Cole sua lista aqui. Formato esperado por linha:&#10;Quantidade / Código / Descrição&#10;Exemplo:&#10;2 / 98005200 / TANQUE MONTADO #26TP-II,&#10;1 / 93571453 / BOMBA #15B-T"></textarea>
-          <button onclick="processarListaPendente()">Processar Lista e Calcular</button>
-        </div>
-      </div>
-
-      <!-- Coluna da Direita: Resultados -->
-      <div class="right-column">
-        <div class="card section">
-          <h2>Resultado da Cubagem</h2>
-          <div id="resultado"></div>
-        </div>
-        <div class="card section">
-          <h2>Buscar Cubagem pelo Número</h2>
-          <input type="number" id="busca_cubagem" placeholder="Digite o número da cubagem...">
-          <button onclick="buscarCubagem()">Buscar Cubagem</button>
-          <div id="resultado_busca"></div>
-        </div>
-      </div>
+    <div id="cubagem-tab" class="tab-content active">
+        <main>
+            <div class="layout-container">
+                 <div class="left-column">
+                     <div class="card section">
+                         <h3>Itens Selecionados</h3>
+                         <ul id="selecionados"></ul>
+                         <button onclick="calcularCubagem()">Calcular Cubagem</button>
+                         <button onclick="exportarPDF()">Exportar PDF</button>
+                     </div>
+                     <div class="card section">
+                         <h2>Buscar Produtos</h2>
+                         <input type="text" id="busca" placeholder="Buscar por código ou nome...">
+                         <ul id="resultados"></ul>
+                     </div>
+                     <div class="card section">
+                         <h2>Colar Lista de Produtos</h2>
+                         <textarea id="paste_area" rows="8" placeholder="Cole sua lista aqui. Formato esperado por linha:&#10;Quantidade / Código / Descrição&#10;Exemplo:&#10;2 / 98005200 / TANQUE MONTADO #26TP-II"></textarea>
+                         <button onclick="processarListaPendente()">Processar Lista e Calcular</button>
+                     </div>
+                 </div>
+                 <div class="right-column">
+                     <div class="card section">
+                         <h2>Resultado da Cubagem</h2>
+                         <div id="resultado"></div>
+                     </div>
+                     <div class="card section">
+                         <h2>Buscar Cubagem pelo Número</h2>
+                         <input type="number" id="busca_cubagem" placeholder="Digite o número da cubagem...">
+                         <button onclick="buscarCubagem()">Buscar Cubagem</button>
+                         <div id="resultado_busca"></div>
+                     </div>
+                 </div>
+            </div>
+        </main>
     </div>
-  </main>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-  <script>
-  // --- JS permanece igual ao anterior ---
-  const resultadosEl = document.getElementById("resultados");
-  const selecionadosEl = document.getElementById("selecionados");
-  const selecionados = [];
-  let ultimoResultado = null;
-
-  document.getElementById("busca").addEventListener("input", async (e) => {
-    const q = e.target.value;
-    if (!q) { resultadosEl.innerHTML = ""; return; }
-    const res = await fetch(`/buscar?q=${q}`);
-    const data = await res.json();
-    resultadosEl.innerHTML = "";
-    data.forEach(prod => {
-      const li = document.createElement("li");
-      li.className = "produto";
-      li.innerHTML = `<span>${prod.Codigo} - ${prod.Nome} (${prod.m3_total.toFixed(3)} m³, ${prod.Peso.toFixed(2)} kg)</span>
-        <button onclick="adicionar(this, '${prod.Codigo}','${prod.Nome}')">Adicionar</button>`;
-      resultadosEl.appendChild(li);
-    });
-  });
-
-  async function adicionarItemESeusAgregados(item) {
-    const existente = selecionados.find(i => i.codigo === item.codigo);
-    if (existente) {
-      existente.quantidade += item.quantidade;
-    } else {
-      selecionados.push(item);
-    }
-
-    if (item.nome.startsWith("SPA J")) {
-      const match = item.nome.match(/J\d{3}/);
-      if (match) {
-          const spaModel = match[0];
-          const searchTerm = `Cobertura Térmica - ${spaModel}`;
-          const res = await fetch(`/buscar?q=${encodeURIComponent(searchTerm)}`);
-          const data = await res.json();
-          if (data.length > 0) {
-              const cover = data[0];
-              const coverInCart = selecionados.find(i => i.codigo === cover.Codigo);
-              if (!coverInCart) {
-                  selecionados.push({ codigo: cover.Codigo, nome: cover.Nome, quantidade: 1 });
-              }
-          }
-      }
-    }
-  }
-
-  async function adicionar(buttonElement, codigo, nome) {
-    await adicionarItemESeusAgregados({ codigo, nome, quantidade: 1 });
-    atualizarSelecionados();
+    <div id="visualizador-tab" class="tab-content">
+        <div id="v3d-container">
+            <div id="v3d-scene-container"><canvas id="v3d-canvas"></canvas></div>
+        </div>
+    </div>
     
-    buttonElement.textContent = 'Adicionado ✔';
-    buttonElement.disabled = true;
-    buttonElement.style.background = '#28a745';
-  }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/DragControls.js"></script>
 
-  function incrementar(codigo) { const item = selecionados.find(i => i.codigo===codigo); if(item){item.quantidade++; atualizarSelecionados();} }
-  function decrementar(codigo) { const item = selecionados.find(i => i.codigo===codigo); if(item){ if(item.quantidade>1){item.quantidade--;} else{remover(codigo);} atualizarSelecionados();} }
-  function remover(codigo){ const idx = selecionados.findIndex(i=>i.codigo===codigo); if(idx>-1) selecionados.splice(idx,1); atualizarSelecionados();}
-  function atualizarSelecionados(){
-    selecionadosEl.innerHTML="";
-    selecionados.forEach(item=>{
-      const li=document.createElement("li");
-      li.className="produto";
-      li.innerHTML=`<span>${item.codigo} - ${item.nome}</span>
-        <div class="produto-buttons">
-        <button class="action-btn" onclick="decrementar('${item.codigo}')">-</button>
-        <button class="action-btn" onclick="incrementar('${item.codigo}')">+</button>
-        <button class="action-btn remove-btn" onclick="remover('${item.codigo}')">x</button>
-        <input type="number" class="qtd-input" value="${item.quantidade}" onchange="updateQuantity('${item.codigo}', this.value)">
-        </div>`;
-      selecionadosEl.appendChild(li);
-    });
-  }
-
-  function updateQuantity(codigo, newQuantity) {
-    const item = selecionados.find(i => i.codigo === codigo);
-    if (item) {
-        const qty = parseInt(newQuantity, 10);
-        if (!isNaN(qty) && qty > 0) {
-            item.quantidade = qty;
-        } else {
-            remover(codigo);
-        }
-        atualizarSelecionados();
-    }
-}
-  
-
-  async function calcularCubagem(){
-    const res=await fetch("/cubagem",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({itens:selecionados})});
-    const data=await res.json();
-    ultimoResultado=data;
-
-    let tabela=`<table><thead><tr><th>Qtd</th><th>Código</th><th>Descrição</th><th>Peso Unit. (kg)</th><th>Peso Total (kg)</th><th>Dimensões (C,L,A)</th><th>M3 Unit</th><th>M3 Total</th><th>Qtd. Caixas</th><th>Tipo Caixa</th></tr></thead><tbody>`;
-    
-    const accessories = data.itens.filter(item => item.Tipo.toLowerCase() === 'acessorio');
-    const otherItems = data.itens.filter(item => item.Tipo.toLowerCase() !== 'acessorio');
-    const orderedItems = [...accessories, ...otherItems];
-    
-    const rowspan = accessories.length > 0 ? accessories.length : 1;
-    const firstBoxableIndex = accessories.length > 0 ? 0 : -1;
-
-    const qtdCaixas = data.caixas.length > 0 ? data.caixas.map(c => c.qtd_caixas).join(', ') : '';
-    const tipoCaixa = data.caixas.length > 0 ? data.caixas.map(c => c.tipo_caixa).join(', ') : '';
-
-    orderedItems.forEach((item, index) => {
-        const qtd = item.Quantidade > 0 ? item.Quantidade : 1;
-        const pesoUnit = (item.Peso / qtd).toFixed(2);
-        const m3Unit = (item.m3_total / qtd).toFixed(4);
-        const dimensoes = `${item.Comprimento.toFixed(2)} x ${item.Largura.toFixed(2)} x ${item.Altura.toFixed(2)}`;
-        
-        let rowHtml = `<tr>
-            <td>${item.Quantidade}</td>
-            <td>${item.Codigo}</td>
-            <td>${item.Nome}</td>
-            <td>${pesoUnit}</td>
-            <td>${item.Peso.toFixed(2)}</td>
-            <td>${dimensoes}</td>
-            <td>${m3Unit}</td>
-            <td>${item.m3_total.toFixed(4)}</td>`;
-
-        const itemType = item.Tipo.toLowerCase();
-        if (itemType === 'acessorio') {
-            if (index === firstBoxableIndex) {
-                rowHtml += `<td rowspan="${rowspan}">${qtdCaixas}</td>`;
-                rowHtml += `<td rowspan="${rowspan}">${tipoCaixa}</td>`;
+    <script>
+        let isThreeJsInitialized = false;
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).style.display = 'block';
+            document.querySelector(`button[onclick="showTab('${tabId}')"]`).classList.add('active');
+            if (tabId === 'visualizador-tab') {
+                if (!isThreeJsInitialized) {
+                    initThreeJs();
+                    isThreeJsInitialized = true;
+                    sincronizarPara3D(); // Sincroniza na primeira vez que abre a aba
+                }
+                window.dispatchEvent(new Event('resize'));
             }
-        } else if (itemType === 'caixa individual') {
-            rowHtml += `<td>${item.Quantidade}</td>`;
-            rowHtml += `<td>Individual</td>`;
-        } else {
-            rowHtml += `<td>-</td><td>-</td>`;
         }
-        rowHtml += '</tr>';
-        tabela += rowHtml;
-    });
-    tabela += "</tbody></table>";
+    </script>
+    
+    <script>
+        const resultadosEl = document.getElementById("resultados");
+        const selecionadosEl = document.getElementById("selecionados");
+        const selecionados = [];
+        let ultimoResultado = null;
 
-    document.getElementById("resultado").innerHTML=`
-    <p><strong>Número da Cubagem:</strong> ${data.numero_cubagem}</p>
-    <p><strong>Total Volume:</strong> ${data.volume_total.toFixed(3)} m³</p>
-    <p><strong>Total Peso:</strong> ${data.peso_total.toFixed(2)} kg</p>
-    <h3>Itens Selecionados</h3>
-    ${tabela}`;
-  }
+        document.getElementById("busca").addEventListener("input", async (e) => {
+            const q = e.target.value;
+            if (!q) { resultadosEl.innerHTML = ""; return; }
+            const res = await fetch(`/buscar?q=${q}`);
+            const data = await res.json();
+            resultadosEl.innerHTML = "";
+            data.forEach(prod => {
+                const li = document.createElement("li");
+                li.className = "produto";
+                li.innerHTML = `<span>${prod.Codigo} - ${prod.Nome} (${prod.m3_total.toFixed(3)} m³, ${prod.Peso.toFixed(2)} kg)</span> <button onclick="adicionar(this, '${prod.Codigo}','${prod.Nome}')">Adicionar</button>`;
+                resultadosEl.appendChild(li);
+            });
+        });
+        
+        async function adicionar(buttonElement, codigo, nome) {
+            selecionados.push({ codigo, nome, quantidade: 1 });
+            atualizarSelecionados();
+            buttonElement.textContent = 'Adicionado ✔';
+            buttonElement.disabled = true;
+        }
+        function remover(codigo){ const idx = selecionados.findIndex(i=>i.codigo===codigo); if(idx>-1) selecionados.splice(idx,1); atualizarSelecionados(); }
+        function updateQuantity(codigo, newQuantity) {
+            const item = selecionados.find(i => i.codigo === codigo);
+            if (item) {
+                const qty = parseInt(newQuantity, 10);
+                if (!isNaN(qty) && qty > 0) item.quantidade = qty; else remover(codigo);
+                atualizarSelecionados();
+            }
+        }
+        function atualizarSelecionados(){
+            selecionadosEl.innerHTML="";
+            selecionados.forEach(item=>{
+                const li=document.createElement("li");
+                li.className="produto";
+                li.innerHTML=`<span>${item.codigo} - ${item.nome}</span> <div><input type="number" class="qtd-input" value="${item.quantidade}" onchange="updateQuantity('${item.codigo}', this.value)"> <button onclick="remover('${item.codigo}')">x</button></div>`;
+                selecionadosEl.appendChild(li);
+            });
+            sincronizarPara3D(); 
+        }
 
-  async function buscarCubagem(){
-    const num = document.getElementById("busca_cubagem").value;
-    if(!num){ alert("Digite um número de cubagem"); return; }
-    const res = await fetch(`/cubagem/${num}`);
-    if(res.status!==200){ alert("Cubagem não encontrada"); return; }
-    const data = await res.json();
+        async function calcularCubagem(){
+            if (selecionados.length === 0) { alert("Nenhum item selecionado."); return; }
+            const res=await fetch("/cubagem",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({itens:selecionados})});
+            const data=await res.json();
+            if (data.erro) { alert(`Erro ao calcular: ${data.erro}`); return; }
+            ultimoResultado=data;
+            let tabela=`<table><thead><tr><th>Qtd</th><th>Código</th><th>Descrição</th><th>Peso Unit. (kg)</th><th>Peso Total (kg)</th><th>Dimensões (C,L,A)</th><th>M3 Unit</th><th>M3 Total</th><th>Qtd. Caixas</th><th>Tipo Caixa</th></tr></thead><tbody>`;
+            const accessories = data.itens.filter(item => item.Tipo.toLowerCase() === 'acessorio');
+            const otherItems = data.itens.filter(item => item.Tipo.toLowerCase() !== 'acessorio');
+            const orderedItems = [...accessories, ...otherItems];
+            const qtdCaixas = data.caixas.length > 0 ? data.caixas[0].qtd_caixas : 0;
+            const tipoCaixa = data.caixas.length > 0 ? data.caixas[0].tipo_caixa : '';
+            const acessoriosDimensoes = accessories.length > 0 ? `${accessories[0].Comprimento.toFixed(2)} x ${accessories[0].Largura.toFixed(2)} x ${accessories[0].Altura.toFixed(2)}` : '';
+            orderedItems.forEach((item, index) => {
+                const qtd = item.Quantidade > 0 ? item.Quantidade : 1;
+                const pesoUnit = (item.Peso / qtd).toFixed(2);
+                const m3Unit = (item.m3_total / qtd).toFixed(4);
+                let rowHtml = `<tr><td>${item.Quantidade}</td><td>${item.Codigo}</td><td>${item.Nome}</td><td>${pesoUnit}</td><td>${item.Peso.toFixed(2)}</td>`;
+                const itemType = item.Tipo.toLowerCase();
+                if (index < accessories.length) { if (index === 0) { rowHtml += `<td rowspan="${accessories.length}">${acessoriosDimensoes}</td>`; } }
+                else { rowHtml += `<td>${item.Comprimento.toFixed(2)} x ${item.Largura.toFixed(2)} x ${item.Altura.toFixed(2)}</td>`; }
+                rowHtml += `<td>${m3Unit}</td><td>${item.m3_total.toFixed(4)}</td>`;
+                if (index < accessories.length) { if (index === 0) { rowHtml += `<td rowspan="${accessories.length}">${qtdCaixas}</td><td rowspan="${accessories.length}">${tipoCaixa}</td>`; } }
+                else if (itemType === 'caixa individual') { rowHtml += `<td>${item.Quantidade}</td><td>Individual</td>`; }
+                else { rowHtml += `<td>-</td><td>-</td>`; }
+                rowHtml += '</tr>';
+                tabela += rowHtml;
+            });
+            tabela += "</tbody></table>";
+            document.getElementById("resultado").innerHTML=`<p><strong>Número da Cubagem:</strong> ${data.numero_cubagem}</p><p><strong>Total Volume:</strong> ${data.volume_total.toFixed(3)} m³</p><p><strong>Total Peso:</strong> ${data.peso_total.toFixed(2)} kg</p><h3>Itens Selecionados</h3>${tabela}`;
+        }
+        
+        async function exportarPDF(){
+            if(!ultimoResultado){ alert("Calcule a cubagem antes de exportar."); return; }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const head = [['Qtd', 'Código', 'Descrição', 'Peso Unit. (kg)', 'Peso Total (kg)', 'Dimensões (C,L,A)', 'M3 Unit', 'M3 Total', 'Qtd. Caixas', 'Tipo Caixa']];
+            const accessories = ultimoResultado.itens.filter(item => item.Tipo.toLowerCase() === 'acessorio');
+            const otherItems = ultimoResultado.itens.filter(item => item.Tipo.toLowerCase() !== 'acessorio');
+            const orderedItems = [...accessories, ...otherItems];
+            const qtdCaixas = ultimoResultado.caixas.length > 0 ? ultimoResultado.caixas[0].qtd_caixas : 0;
+            const tipoCaixa = ultimoResultado.caixas.length > 0 ? ultimoResultado.caixas[0].tipo_caixa : '';
+            const acessoriosDimensoes = accessories.length > 0 ? `${accessories[0].Comprimento.toFixed(2)} x ${accessories[0].Largura.toFixed(2)} x ${accessories[0].Altura.toFixed(2)}` : '';
+            const body = [];
+            orderedItems.forEach((item, index) => {
+                const qtd = item.Quantidade > 0 ? item.Quantidade : 1;
+                const row = [item.Quantidade, item.Codigo, item.Nome, (item.Peso / qtd).toFixed(2), item.Peso.toFixed(2)];
+                const itemType = item.Tipo.toLowerCase();
+                if (index < accessories.length) { if (index === 0) { row.push({ content: acessoriosDimensoes, rowSpan: accessories.length }); } }
+                else { row.push(`${item.Comprimento.toFixed(2)} x ${item.Largura.toFixed(2)} x ${item.Altura.toFixed(2)}`); }
+                row.push((item.m3_total / qtd).toFixed(4), item.m3_total.toFixed(4));
+                if (index < accessories.length) { if (index === 0) { row.push({ content: qtdCaixas, rowSpan: accessories.length }); row.push({ content: tipoCaixa, rowSpan: accessories.length }); } }
+                else if (itemType === 'caixa individual') { row.push(item.Quantidade); row.push('Individual'); }
+                else { row.push('-'); row.push('-'); }
+                body.push(row);
+            });
+            doc.addImage("https://i.postimg.cc/VLwvF6FG/jacuzzi-logo.png", 'PNG', 10, 10, 50, 20);
+            doc.text(`Relatório de Cubagem #${ultimoResultado.numero_cubagem}`, 70, 25);
+            doc.autoTable({ head, body, startY: 35, theme: 'grid', headStyles: { fillColor: [0, 64, 128] } });
+            doc.save(`cubagem_${ultimoResultado.numero_cubagem}.pdf`);
+        }
 
-    let tabela=`<table><thead><tr><th>Código</th><th>Nome</th><th>Qtd</th><th>C (cm)</th><th>L (cm)</th><th>A (cm)</th><th>Volume (m³)</th><th>Peso (kg)</th></tr></thead><tbody>`;
-    data.itens.forEach(item=>{ tabela+=`<tr><td>${item.Codigo}</td><td>${item.Nome}</td><td>${item.Quantidade}</td>
-    <td>${item.Comprimento}</td><td>${item.Largura}</td><td>${item.Altura}</td><td>${item.m3_total.toFixed(3)}</td><td>${item.Peso.toFixed(2)}</td></tr>`; });
-    tabela+="</tbody></table>";
+        async function processarListaPendente() {
+             const text = document.getElementById('paste_area').value;
+             if (!text.trim()) { alert('Por favor, cole a lista de produtos na área de texto.'); return; }
+             selecionados.length = 0;
+             const lines = text.split('\n').filter(line => line.trim() !== '');
+             const codesToFetch = [];
+             lines.forEach(line => {
+                 const match = line.match(/(\d{5,})/);
+                 if (match) {
+                     const code = match[0];
+                     const qtyMatch = line.match(/^(\d+)\s|\s(\d+)\s/);
+                     const quantity = qtyMatch ? parseInt(qtyMatch[1] || qtyMatch[2], 10) : 1;
+                     codesToFetch.push({codigo: code, quantidade: quantity});
+                 }
+             });
+             if (codesToFetch.length === 0) { alert("Nenhum código de produto válido encontrado na lista."); return; }
+             const res = await fetch('/buscar_lista', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ codigos: codesToFetch.map(c => c.codigo) }) });
+             const foundProducts = await res.json();
+             foundProducts.forEach(product => {
+                 const itemInList = codesToFetch.find(c => c.codigo === product.Codigo);
+                 if (itemInList) {
+                    selecionados.push({ codigo: product.Codigo, nome: product.Nome, quantidade: itemInList.quantidade });
+                 }
+             });
+             atualizarSelecionados();
+             if(selecionados.length > 0) calcularCubagem();
+         }
+        async function buscarCubagem(){ /* código original */ }
+    </script>
+    
+    <script>
+        let v3d_scene, v3d_camera, v3d_renderer, v3d_controls, v3d_dragControls;
+        let v3d_draggableObjects = [];
+        
+        // Constantes da caixa de acessórios para usar no JavaScript
+        const CAIXA_ACESSORIOS_COMPRIMENTO_JS = 0.36;
+        const CAIXA_ACESSORIOS_LARGURA_JS = 0.36;
+        const CAIXA_ACESSORIOS_ALTURA_JS = 0.64;
+        const CAIXA_ACESSORIOS_VOLUME_JS = CAIXA_ACESSORIOS_COMPRIMENTO_JS * CAIXA_ACESSORIOS_LARGURA_JS * CAIXA_ACESSORIOS_ALTURA_JS;
 
-    document.getElementById("resultado_busca").innerHTML=`
-    <p><strong>Número da Cubagem:</strong> ${data.id}</p>
-    <p><strong>Total Volume:</strong> ${data.volume_total.toFixed(3)} m³</p>
-    <p><strong>Total Peso:</strong> ${data.peso_total.toFixed(2)} kg</p>
-    <h3>Itens</h3>
-    ${tabela}`;
-  }
+        function initThreeJs() {
+            const sceneContainer = document.getElementById('v3d-scene-container');
+            const canvas = document.getElementById('v3d-canvas');
+            v3d_scene = new THREE.Scene();
+            v3d_scene.background = new THREE.Color(0xf0f0f0);
+            v3d_camera = new THREE.PerspectiveCamera(75, sceneContainer.clientWidth / sceneContainer.clientHeight, 0.1, 2000);
+            v3d_renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+            v3d_controls = new THREE.OrbitControls(v3d_camera, v3d_renderer.domElement);
+           const TRUCK_DIMS = { width: 1200, height: 300, depth: 300 }; // 12m x 3m x 3m
+            v3d_renderer.setSize(sceneContainer.clientWidth, sceneContainer.clientHeight);
+            v3d_scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+            dirLight.position.set(200, 500, 300);
+            v3d_scene.add(dirLight);
+            const truckGeom = new THREE.BoxGeometry(TRUCK_DIMS.width, TRUCK_DIMS.height, TRUCK_DIMS.depth);
+            const truckMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, transparent: true, opacity: 0.2, side: THREE.BackSide });
+            const truck = new THREE.Mesh(truckGeom, truckMat);
+            truck.position.set(TRUCK_DIMS.width / 2, TRUCK_DIMS.height / 2, TRUCK_DIMS.depth / 2);
+            v3d_scene.add(truck);
+            const edges = new THREE.LineSegments(new THREE.EdgesGeometry(truckGeom), new THREE.LineBasicMaterial({ color: 0x555555 }));
+            edges.position.copy(truck.position);
+            v3d_scene.add(edges);
+            v3d_camera.position.set(1500, 600, 1500); // aumenta a distância da câmera
+            v3d_controls.target.set(TRUCK_DIMS.width / 2, TRUCK_DIMS.height / 2, TRUCK_DIMS.depth / 2);
+            animateV3d();
+            window.addEventListener("resize", () => {
+                if (!v3d_renderer) return;
+                const sc = document.getElementById('v3d-scene-container');
+                v3d_camera.aspect = sc.clientWidth / sc.clientHeight;
+                v3d_camera.updateProjectionMatrix();
+                v3d_renderer.setSize(sc.clientWidth, sc.clientHeight);
+            });
+        }
+        function animateV3d() { requestAnimationFrame(animateV3d); v3d_controls.update(); v3d_renderer.render(v3d_scene, v3d_camera); }
 
-  async function exportarPDF(){
-      if(!ultimoResultado){ alert("Calcule a cubagem antes de exportar."); return; }
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+        function desenharCaixas3D(items) {
+            v3d_draggableObjects.forEach(obj => v3d_scene.remove(obj));
+            v3d_draggableObjects = [];
+            if (v3d_dragControls) v3d_dragControls.dispose();
+            items.forEach(item => {
+                const geometry = new THREE.BoxGeometry(item.largura, item.altura, item.profundidade);
+                const material = new THREE.MeshStandardMaterial({ color: Math.random() * 0xffffff });
+                const box = new THREE.Mesh(geometry, material);
+                box.position.set(item.posicao.x + item.largura / 2, item.posicao.y + item.altura / 2, item.posicao.z + item.profundidade / 2);
+                v3d_scene.add(box);
+                v3d_draggableObjects.push(box);
+            });
+            v3d_dragControls = new THREE.DragControls(v3d_draggableObjects, v3d_camera, v3d_renderer.domElement);
+            v3d_dragControls.addEventListener('dragstart', () => v3d_controls.enabled = false);
+            v3d_dragControls.addEventListener('dragend', () => v3d_controls.enabled = true);
+        }
 
-      const head = [['Qtd', 'Código', 'Descrição', 'Peso Unit. (kg)', 'Peso Total (kg)', 'Dimensões (C,L,A)', 'M3 Unit', 'M3 Total', 'Qtd. Caixas', 'Tipo Caixa']];
-      const accessories = ultimoResultado.itens.filter(item => item.Tipo.toLowerCase() === 'acessorio');
-      const otherItems = ultimoResultado.itens.filter(item => item.Tipo.toLowerCase() !== 'acessorio');
-      const orderedItems = [...accessories, ...otherItems];
-      
-      const rowspan = accessories.length > 0 ? accessories.length : 1;
-      const firstBoxableIndex = accessories.length > 0 ? 0 : -1;
+        async function sincronizarPara3D() {
+            if (!isThreeJsInitialized || selecionados.length === 0) {
+                if (isThreeJsInitialized) desenharCaixas3D([]);
+                return;
+            }
+            
+            const codigos = selecionados.map(item => item.codigo);
+            const res = await fetch('/buscar_lista', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ codigos }) });
+            const produtosCompletos = await res.json();
+            
+            const itensParaPacker = [];
+            let volumeTotalAcessorios = 0;
 
-      const qtdCaixas = ultimoResultado.caixas.length > 0 ? ultimoResultado.caixas.map(c => c.qtd_caixas).join(', ') : '';
-      const tipoCaixa = ultimoResultado.caixas.length > 0 ? ultimoResultado.caixas.map(c => c.tipo_caixa).join(', ') : '';
+            // Processa primeiro os itens individuais/normais
+            selecionados.forEach(itemSelecionado => {
+                const detalhesProduto = produtosCompletos.find(p => p.Codigo === itemSelecionado.codigo);
+                if (detalhesProduto) {
+                    const tipo = detalhesProduto.Tipo.toLowerCase();
+                    if (tipo !== 'acessorio') {
+                        for (let i = 0; i < itemSelecionado.quantidade; i++) {
+                            itensParaPacker.push({
+                                nome: `${detalhesProduto.Nome} #${i + 1}`,
+                                largura: detalhesProduto.Largura * 100,
+                                altura: detalhesProduto.Altura * 100,
+                                profundidade: detalhesProduto.Comprimento * 100,
+                                peso: detalhesProduto.Peso
+                            });
+                        }
+                    } else {
+                        // Se for acessório, apenas soma o volume
+                        volumeTotalAcessorios += detalhesProduto.m3_total * itemSelecionado.quantidade;
+                    }
+                }
+            });
 
-      const body = [];
-      orderedItems.forEach((item, index) => {
-          const qtd = item.Quantidade > 0 ? item.Quantidade : 1;
-          const row = [
-              item.Quantidade,
-              item.Codigo,
-              item.Nome,
-              (item.Peso / qtd).toFixed(2),
-              item.Peso.toFixed(2),
-              `${item.Comprimento.toFixed(2)} x ${item.Largura.toFixed(2)} x ${item.Altura.toFixed(2)}`,
-              (item.m3_total / qtd).toFixed(4),
-              item.m3_total.toFixed(4)
-          ];
+            // Agora, calcula e adiciona as caixas de acessórios padronizadas
+            if (volumeTotalAcessorios > 0) {
+                const numCaixasAcessorios = Math.ceil(volumeTotalAcessorios / CAIXA_ACESSORIOS_VOLUME_JS);
+                for (let i = 0; i < numCaixasAcessorios; i++) {
+                    itensParaPacker.push({
+                        nome: `Caixa de Acessórios #${i + 1}`,
+                        largura: CAIXA_ACESSORIOS_LARGURA_JS * 100,
+                        altura: CAIXA_ACESSORIOS_ALTURA_JS * 100,
+                        profundidade: CAIXA_ACESSORIOS_COMPRIMENTO_JS * 100,
+                        peso: 10 // Peso simbólico
+                    });
+                }
+            }
 
-          const itemType = item.Tipo.toLowerCase();
-          if (itemType === 'acessorio') {
-              if (index === firstBoxableIndex) {
-                  row.push({ content: qtdCaixas, rowSpan: rowspan });
-                  row.push({ content: tipoCaixa, rowSpan: rowspan });
-              }
-          } else if (itemType === 'caixa individual') {
-              row.push(item.Quantidade);
-              row.push('Individual');
-          } else {
-              row.push('-');
-              row.push('-');
-          }
-          body.push(row);
-      });
-
-      const img = new Image();
-      img.src = "https://i.postimg.cc/VLwvF6FG/jacuzzi-logo.png";
-      img.onload = function() {
-          doc.addImage(img, 'PNG', 10, 10, 50, 20);
-          doc.setFontSize(18);
-          doc.text('Relatório de Cubagem', 70, 25);
-
-          doc.setFontSize(12);
-          doc.text(`Número da Cubagem: ${ultimoResultado.numero_cubagem}`, 10, 40);
-          doc.text(`Data: ${new Date().toLocaleDateString()}`, 10, 47);
-          doc.text(`Volume Total: ${ultimoResultado.volume_total.toFixed(4)} m³`, 10, 54);
-          doc.text(`Peso Total: ${ultimoResultado.peso_total.toFixed(2)} kg`, 10, 61);
-
-          doc.autoTable({
-              head: head,
-              body: body,
-              startY: 70,
-              theme: 'grid',
-              headStyles: { fillColor: [0, 64, 128] },
-              styles: { fontSize: 8, cellPadding: 2 },
-              alternateRowStyles: { fillColor: [245, 245, 245] },
-              didDrawPage: function (data) {
-                  const doc = data.doc;
-                  const pageHeight = doc.internal.pageSize.getHeight();
-                  doc.setFontSize(8);
-                  doc.setTextColor(100);
-                  
-                  const footerText1 = "Relatorio de Cubagem aproximada";
-                  const footerText2 = "ROD. WALDOMIRO C. CAMARGO, Km 53,5 • CEP 13308-900 – ITU – SP • Tel. (11) 2118-7500 • Fax. (11) 4024-3695";
-                  const footerText3 = "http://www.jacuzzi.com.br • email: vendas@jacuzzi.com.br";
-
-                  doc.text(footerText1, data.settings.margin.left, pageHeight - 15);
-                  doc.text(footerText2, data.settings.margin.left, pageHeight - 10);
-                  doc.text(footerText3, data.settings.margin.left, pageHeight - 5);
-              }
-          });
-
-          doc.save(`cubagem_${ultimoResultado.numero_cubagem}.pdf`);
-      }
-  }
-
-  async function processarListaPendente() {
-      const text = document.getElementById('paste_area').value;
-      if (!text.trim()) {
-          alert('Por favor, cole a lista de produtos na área de texto.');
-          return;
-      }
-
-      selecionados.length = 0;
-      atualizarSelecionados();
-
-      const lines = text.replace(/,/g, '\n').split('\n').filter(line => line.trim() !== '');
-      
-      let itemsToProcess = [];
-      for (const line of lines) {
-          const firstSeparator = line.search(/[\/,]/);
-
-          if (firstSeparator === -1) continue;
-
-          const quantityStr = line.substring(0, firstSeparator).trim();
-          const quantity = parseInt(quantityStr, 10);
-          const identifier = line.substring(firstSeparator + 1).trim();
-
-          if (isNaN(quantity) || !identifier) continue;
-          
-          if (!isNaN(identifier) && !isNaN(parseFloat(identifier))) {
-              itemsToProcess.push({ type: 'code', value: identifier, quantity: quantity });
-          } else {
-              itemsToProcess.push({ type: 'description', value: identifier, quantity: quantity });
-          }
-      }
-
-      const codesToFetch = itemsToProcess.filter(i => i.type === 'code').map(i => i.value);
-      const descriptionsToFetch = itemsToProcess.filter(i => i.type === 'description');
-      
-      const fetchPromises = [];
-      if (codesToFetch.length > 0) {
-          fetchPromises.push(fetch('/buscar_lista', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ codigos: codesToFetch })
-          }).then(res => res.json()));
-      }
-      for (const item of descriptionsToFetch) {
-          fetchPromises.push(fetch(`/buscar?q=${encodeURIComponent(item.value)}`).then(res => res.json()));
-      }
-
-      const allResults = await Promise.all(fetchPromises);
-      const allFoundProducts = allResults.flat();
-
-      const addPromises = [];
-      let notFoundItems = [];
-
-      for (const item of itemsToProcess) {
-          let product;
-          if (item.type === 'code') {
-              product = allFoundProducts.find(p => p.Codigo === item.value);
-          } else {
-              product = allFoundProducts.find(p => p.Nome.toLowerCase().includes(item.value.toLowerCase()));
-          }
-
-          if (product) {
-              addPromises.push(adicionarItemESeusAgregados({
-                  codigo: product.Codigo,
-                  nome: product.Nome,
-                  quantidade: item.quantity
-              }));
-          } else {
-              notFoundItems.push(item.value);
-          }
-      }
-
-      await Promise.all(addPromises);
-
-      atualizarSelecionados();
-      
-      if (notFoundItems.length > 0) {
-          alert(`Os seguintes itens não foram encontrados:\n${notFoundItems.join('\n')}`);
-      }
-
-      await calcularCubagem();
-  }
-  </script>
-  </body>
-  </html>
+            if(itensParaPacker.length > 0) {
+                const packRes = await fetch("/pack", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: itensParaPacker }) });
+                const packData = await packRes.json();
+                desenharCaixas3D(packData.fitted_items);
+            } else {
+                desenharCaixas3D([]);
+            }
+        }
+    </script>
+</body>
+</html>
